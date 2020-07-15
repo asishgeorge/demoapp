@@ -119,7 +119,7 @@
                                         <li>10 Emails</li>
                                         <li>10 Domains</li>
                                         <li>1GB Bandwidth</li>
-                                        <li class="grey"><a target="_blank" href="http://localhost:3001/billing/payment/${planData.paymentGatewayPlanId}/${key}" class="button">Subscribe</a></li>
+                                        <li class="grey"><a target="_blank" href="http://localhost:3001/billing/payment/${planData.paymentGatewayPlanId}/${applicationCustomerId}/${key}" class="button">Subscribe</a></li>
                                     </ul>
                                 </div>                   
                             `
@@ -143,7 +143,7 @@
                         document.getElementById('paymentHistory').innerHTML = `
                             <h2 style="text-align:center">See Payment History</h2>
                             <div style="width=100%; text-align:center"> 
-                            <a target="_blank" style="text-align:center" href="http://localhost:3001/payment-details/payment-method/${applicationCustomerId}/${key}" class="button">Payment History</a>
+                            <a target="_blank" style="text-align:center" href="http://localhost:3001/payment-details/payment-method/${applicationCustomerId}" class="button">Payment History</a>
                             </div>
                         `
                     })
