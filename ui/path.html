@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCA Plans</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        .columns {
+            float: left;
+            width: 30%;
+            padding: 8px;
+            margin: 0 50px;
+        }
+
+        .price {
+            list-style-type: none;
+            border: 1px solid #eee;
+            margin: 0;
+            padding: 0;
+            -webkit-transition: 0.3s;
+            transition: 0.3s;
+        }
+
+        .price:hover {
+            box-shadow: 0 8px 12px 0 rgba(0, 0, 0, 0.2)
+        }
+
+        .price .header {
+            background-color: #111;
+            color: white;
+            font-size: 25px;
+        }
+
+        .price li {
+            border-bottom: 1px solid #eee;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .price .grey {
+            background-color: #eee;
+            font-size: 20px;
+        }
+
+        .button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 25px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .columns {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+
+
+    <h2 style="text-align:center">MCA Pricing Tables</h2>
+
+
+    <div class="container" style="padding-left: 250px; height:500px">
+        <div id="priceContainer"></div>
+
+    </div> <br>
+
+    <div class="container">
+
+        <div style="width: 100%;" id="paymentHistory">
+
+        </div>
+    </div>
+
+
+
+
+    <script>
+
+        window.onload = async function () {
+
+            const key = 'dd1130bb-575c-408a-b610-a9c7d2822210'
+            var data = {
+                ref: window.location.href,
+                key
+            }
+
+            const applicationCustomerId = '155Asdsd88as'
+
+            verify('http://localhost:3000/verify', data).then(data => {
+                if (data.token) {
+
+                    console.log(data.token);
+                    getData('http://localhost:3000/getPlansForApplication', data.token).then(data => {
+
+                        document.getElementById('priceContainer').innerHTML = data.map(planData => {
+                            console.log(planData);
+                            if (planData.planName === 'Basic') {
+
+                                return `
+                                <div class="columns">
+                                    <ul class="price">
+                                        <li class="header">${planData.planName}</li>
+                                        <li class="grey">$ ${planData.price} / year</li>
+                                        <li>10GB Storage</li>
+                                        <li>10 Emails</li>
+                                        <li>10 Domains</li>
+                                        <li>1GB Bandwidth</li>
+                                        <li class="grey"><a target="_blank" href="http://localhost:3001/billing/payment/${planData.paymentGatewayPlanId}/${key}" class="button">Subscribe</a></li>
+                                    </ul>
+                                </div>                   
+                            `
+                            } else {
+                                return `
+                                <div class="columns">
+                                    <ul class="price">
+                                        <li class="header">${planData.planName}</li>
+                                        <li class="grey">$ ${planData.price} / year</li>
+                                        <li>20GB Storage</li>
+                                        <li>20 Emails</li>
+                                        <li>20 Domains</li>
+                                        <li>2GB Bandwidth</li>
+                                        <li class="grey"><a target="_blank" href="http://localhost:3001/billing/payment/${planData.paymentGatewayPlanId}/${applicationCustomerId}/${key}" class="button">Subscribe</a></li>
+                                    </ul>
+                                </div>         
+                            `
+                            }
+
+                        }).join('')
+                        document.getElementById('paymentHistory').innerHTML = `
+                            <h2 style="text-align:center">See Payment History</h2>
+                            <div style="width=100%; text-align:center"> 
+                            <a target="_blank" style="text-align:center" href="http://localhost:3001/payment-details/payment-method/${applicationCustomerId}/${key}" class="button">Payment History</a>
+                            </div>
+                        `
+                    })
+                } else {
+                    console.log('AUTH FAILED');
+                }
+            })
+        }
+
+        async function getData(url = '', token = '') {
+            const resp = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+            });
+
+            return resp.json()
+        }
+
+        async function verify(url = '', data = {}) {
+
+            const resp = await fetch(url, {
+                method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                mode: 'cors', // no-cors, *cors, same-origin
+                cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                credentials: 'same-origin', // include, *same-origin, omit
+                headers: {
+                    'Content-Type': 'application/json'
+                    // 'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                redirect: 'follow', // manual, *follow, error
+                referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                body: JSON.stringify(data) // body data type must match "Content-Type" header
+            })
+
+            return (resp.json());
+        }
+    </script>
+</body>
+
+</html>
