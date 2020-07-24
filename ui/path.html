@@ -64,6 +64,8 @@
             }
         }
     </style>
+    <script src="bundle.js"></script>
+
 </head>
 
 <body>
@@ -90,21 +92,26 @@
 
     <script>
 
+        const jwt = window.jwt;
+        const id = '5f11721471a3b7407045d208'
+        const key = 'dd1130bb-575c-408a-b610-a9c7d2822210'
+        const frontendURL = 'https://dev-generic-payment-platform-web.iinerds.com';
+        const backendURL = 'https://dev-generic-payment-platform.iinerds.com';
+        const applicationCustomerId = '155Asdsd88as';
         window.onload = async function () {
-
-            const key = 'dd1130bb-575c-408a-b610-a9c7d2822210'
+            console.log(jwt);
             var data = {
                 ref: window.location.href,
-                key
+                id
             }
-
-            const applicationCustomerId = '155Asdsd88as'
-
-            verify('http://localhost:3000/verify', data).then(data => {
-                if (data.token) {
-
+            let token = jwt.sign(data, key, { expiresIn: '5m' })
+            console.log('TOKEN', token);
+            verify(backendURL + '/verify', { token }).then(res => {
+                console.log(res.data);
+                if (res.data.token) {
+                    // <li class="grey"><a target="_blank" href="${frontendURL}/billing/payment/${planData.paymentGatewayPlanId}/${applicationCustomerId}/${key}" class="button">Subscribe</a></li>
                     console.log(data.token);
-                    getData('http://localhost:3000/getPlansForApplication', data.token).then(data => {
+                    getData(backendURL + '/getPlansForApplication', res.data.token).then(data => {
 
                         document.getElementById('priceContainer').innerHTML = data.map(planData => {
                             console.log(planData);
@@ -119,7 +126,7 @@
                                         <li>10 Emails</li>
                                         <li>10 Domains</li>
                                         <li>1GB Bandwidth</li>
-                                        <li class="grey"><a target="_blank" href="http://localhost:3001/billing/payment/${planData.paymentGatewayPlanId}/${applicationCustomerId}/${key}" class="button">Subscribe</a></li>
+                                        <li class="grey"><span class="button"  onclick="subscribe('${planData.paymentGatewayPlanId}'); return false" style='cursor:pointer'>Subscribe</span></li>
                                     </ul>
                                 </div>                   
                             `
@@ -133,7 +140,7 @@
                                         <li>20 Emails</li>
                                         <li>20 Domains</li>
                                         <li>2GB Bandwidth</li>
-                                        <li class="grey"><a target="_blank" href="http://localhost:3001/billing/payment/${planData.paymentGatewayPlanId}/${applicationCustomerId}/${key}" class="button">Subscribe</a></li>
+                                        <li class="grey"><span class="button"  onclick="subscribe('${planData.paymentGatewayPlanId}'); return false" style='cursor:pointer'>Subscribe</span></li>
                                     </ul>
                                 </div>         
                             `
@@ -143,7 +150,7 @@
                         document.getElementById('paymentHistory').innerHTML = `
                             <h2 style="text-align:center">See Payment History</h2>
                             <div style="width=100%; text-align:center"> 
-                            <a target="_blank" style="text-align:center" href="http://localhost:3001/payment-details/payment-method/${applicationCustomerId}" class="button">Payment History</a>
+                            <span class="button"  onclick="paymentHistory(); return false" style='cursor:pointer'>Payment History</span>
                             </div>
                         `
                     })
@@ -152,6 +159,22 @@
                 }
             })
         }
+
+        async function subscribe(planId) {
+            // console.log(planId);
+            let data = { planId, id, applicationCustomerId }
+            let token = jwt.sign(data, key, { expiresIn: '5m' })
+            window.location.href = frontendURL + '/billing/payment/' + token
+
+        }
+
+        function paymentHistory() {
+            let data = { id, applicationCustomerId }
+            let token = jwt.sign(data, key, { expiresIn: '5m' })
+            window.location.href = frontendURL + '/billing/payment-details/' + token
+
+        }
+
 
         async function getData(url = '', token = '') {
             const resp = await fetch(url, {
